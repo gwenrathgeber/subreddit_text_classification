@@ -58,12 +58,17 @@ print('Removing URLs from posts...')
 df['selftext'] = [re.sub(r'^https?:\/\/.*[\r\n]*', '', text, flags=re.MULTILINE) for text in df['selftext']]
 
 print('Removing URLs from titles...')
-df['title'] = [re.sub(r'http\S+', '', text) for text in df['selftext']]
+df['title'] = [re.sub(r'http\S+', '', text) for text in df['title']]
 
 # Remove certain reddit markdown issues from title and selftext column
 print('Removing markdown issues...')
-df['selftext'] = df['selftext'].str.replace('x200B','')
-df.loc[:,'selftext'] = df['selftext'].str.replace('\n',' ')
+for column in ['title','selftext']:
+    df[column] = df[column].str.replace('\xa0',' ')
+    df[column] = df[column].str.replace('&lt;',' ')
+    df[column] = df[column].str.replace('&gt;',' ')
+    df[column] = df[column].str.replace('&amp;',' ')
+    df[column] = df[column].str.replace('x200B','')
+    df.loc[:,column] = df[column].str.replace('\n',' ')
 
 # Remove punctuation manually:
 print('Removing punctuation...')

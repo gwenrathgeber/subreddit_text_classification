@@ -7,9 +7,6 @@ from nltk.stem.porter import PorterStemmer
 from nltk.tokenize import word_tokenize
 import time 
 
-start_time = time.perf_counter()
-current_time = time.perf_counter()
-
 # Data
 df = pd.read_csv('../data/cleaned_subreddit_data.csv')
 
@@ -25,25 +22,25 @@ def tokenize(column):
 
 def lemmatize(tokenized_column):
     lemmatizer = WordNetLemmatizer()
-    df[column] = [[lemmatizer.lemmatize(word) for word in text] for text in df[tokenized_column]]
-    return df[column]
+    df[tokenized_column] = [' '.join([lemmatizer.lemmatize(word) for word in text]) for text in df[tokenized_column]]
+    return df[tokenized_column]
 
-def stem(lemmatized_column):
-    stemmer = PorterStemmer()
-    df[column] = [' '.join([stemmer.stem(word) for word in text]) for text in df[lemmatized_column]]
-    return df[column]
+# def stem(lemmatized_column):
+#     stemmer = PorterStemmer()
+#     df[lemmatized_column] = [' '.join([stemmer.stem(word) for word in text]) for text in df[lemmatized_column]]
+#     return df[lemmatized_column]
 
 def main():
     for column in columns:
         print(f'Tokenizing {column}')
         start_time = time.perf_counter()
-        df[column] = tokenize(df[column])
+        df[column] = tokenize(column)
         print(f'{time.perf_counter() - start_time} elapsed')
         print(f'Lemmatizing {column}')
-        df[column] = lemmatize(df[column])
+        df[column] = lemmatize(column)
         print(f'{time.perf_counter() - start_time} elapsed')
-        print(f'Stemming {column} and rejoining.')
-        df[column] = stem(df[column])
+        # print(f'Stemming {column} and rejoining.')
+        # df[column] = stem(column)
         print(f'Total time elapsed on column {column}: {time.perf_counter() - start_time}')
     
     print(f'Total preprocessing time: {time.perf_counter() - start_time}')
