@@ -23,7 +23,9 @@ After evaluating whether we have managed to beat a baseline accuracy rating dete
 ### Data Sourcing and Cleaning
 
 [get_data.py](./code/get_data.py)  
+
 [clean_raw_data.py](./code/clean_raw_data.py)  
+
 [preprocessing.py](./code/preprocessing.py)  
 
 Our three data preparation scripts can be found in the project_3/code/ directory.
