@@ -46,7 +46,7 @@ Lastly, our `preprocessing` script reads the output file of our `clean_raw_data`
 
 In this notebook, we explore the frequency of words in the dataset after excluding Scikit-Learn's built-in english-language stopwords.
 
-![Most Common Words Without Custom Stopwords](./images/before stopwords.png)  
+![](./images/before_stopwords.png)  
 
 Building an additional set of custom stopwords is important for this project in particular because of the massive topical overlap of our text sources. As you can see above, the three subreddits would be almost indistinguishable if you simply presented the most common words in each, even after removing generic english-language stopwords.
 
@@ -58,13 +58,13 @@ This notebook outputs a final .JSON of stopwords for us to append to Scikit-Lear
 
 ### Data Exploration and Visualizations
 
-[EDA And Visualizations.ipynb](./code/EDA And Visualizations.ipynb)  
+[eda_and_visualizations.ipynb](./code/eda_and_visualizations.ipynb)  
 
 In this notebook, we explore our text data in a bag-of-words state. We investigate the most common words per subreddit, and words which are distinctive to each subreddit.
 
 ### Modeling and Analysis
 
-[Modeling and Analysis.ipynb](./code/Modeling and Analysis.ipynb)  
+[modeling_and_analysis.ipynb](./code/modeling_and_analysis.ipynb)  
 
 In this notebook, we build our models, tracking their accuracy, and make overall evaluations of model performance.
 
