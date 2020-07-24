@@ -1,13 +1,20 @@
 # ![](https://ga-dash.s3.amazonaws.com/production/assets/logo-9f88ae6c9c3871690e33280fcf557f33.png) Project 3: Web APIs & NLP
 
-### Description
+## Problem Statement
 
-In week four we've learned about a few different classifiers. In week five we'll learn about webscraping, APIs, and Natural Language Processing (NLP). This project will put those skills to the test.
+As part of a policy shift from Reddit.com, we have been instructed to make the site more user-friendly by forcing the merger of redundant subreddits. It is our task to identify which subreddits fail to sufficiently differentiate themselves from competing subreddits on similar topics, and go about merging them.
 
-For project 3, your goal is two-fold:
-1. Using [Pushshift's](https://github.com/pushshift/api) API, you'll collect posts from two subreddits of your choosing.
-2. You'll then use NLP to train a classifier on which subreddit a given post came from. This is a binary classification problem.
+Upon hearing of this policy shift, many subreddit moderators were incensed. In particular, the moderators of r/freefolk, r/gameofthrones, and r/asoiaf, three subreddits which all host discussion of the Song of Ice and Fire novel series and Game of Thrones television show, have come together in a rare moment of unity to express their insistence that they are very substantially different communities worth preserving in their current states.
 
+We have decided to evaluate this claim objectively by testing whether or not the best machine learning classifier we can produce is able to tell posts from each of the three subreddits apart from each other. If we cannot generate accurate predictions of which subreddit a text post originates from with no other inputs besides the text of the posts themselves, we will be forced to combine the subreddits.
+
+Given these conditions, we have selected raw accuracy as our model evaluation metric; we simply wish to know if there are meaningful distinctions in the subreddits' contents, such that we can identify posts' origins better than simply guessing blindly.
+
+We have elected to use a variety of classification models of increasing complexity to tackle this challenge. We will use generic and regularized logistic regressions, a Naive Bayes classifier, several different tree-based classifiers ranging in complexity from a single decision tree to random forests and boosted trees, and finally a support vector machine. After constructing each of these models, we will then create an ensemble vote model which averages all of our models' predictions, reaching for the highest possible accuracy by letting systematic issues in any of our individual models balance each other out.
+
+To obtain the data, we will query the PushShift API, pulling three years worth of posts from each subreddit. We will then conduct certain cleaning and preprocessing steps, including dropping non-text posts from our set and removing URLs and Reddit markdown artifacts. We will then lemmatize all words in the dataset to standardize it.
+
+After evaluating our models' accuracies against a baseline accuracy determined before modeling begins, 
 
 #### About the API
 
