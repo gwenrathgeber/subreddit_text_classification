@@ -8,165 +8,73 @@ Upon hearing of this policy shift, many subreddit moderators were incensed. In p
 
 We have decided to evaluate this claim objectively by testing whether or not the best machine learning classifier we can produce is able to tell posts from each of the three subreddits apart from each other. If we cannot generate accurate predictions of which subreddit a text post originates from with no other inputs besides the text of the posts themselves, we will be forced to combine the subreddits.
 
-Given these conditions, we have selected raw accuracy as our model evaluation metric; we simply wish to know if there are meaningful distinctions in the subreddits' contents, such that we can identify posts' origins better than simply guessing blindly.
+## Executive Summary
+
+We have selected raw accuracy as our model evaluation metric; we simply wish to know if there are meaningful distinctions in the subreddits' contents, such that we can identify posts' origins better than simply guessing blindly.
 
 We have elected to use a variety of classification models of increasing complexity to tackle this challenge. We will use generic and regularized logistic regressions, a Naive Bayes classifier, several different tree-based classifiers ranging in complexity from a single decision tree to random forests and boosted trees, and finally a support vector machine. After constructing each of these models, we will then create an ensemble vote model which averages all of our models' predictions, reaching for the highest possible accuracy by letting systematic issues in any of our individual models balance each other out.
 
 To obtain the data, we will query the PushShift API, pulling three years worth of posts from each subreddit. We will then conduct certain cleaning and preprocessing steps, including dropping non-text posts from our set and removing URLs and Reddit markdown artifacts. We will then lemmatize all words in the dataset to standardize it.
 
-After evaluating our models' accuracies against a baseline accuracy determined before modeling begins, 
+After evaluating whether we have managed to beat a baseline accuracy rating determined by a dummy model which predicts the most frequent class, we will evaluate whether or not r/freefolk, r/gameofthrones, and r/asoiaf are, in fact, distinguishable.
 
-#### About the API
+## Project Workflow
 
-Pushshift's API is fairly straightforward. For example, if I want the posts from [`/r/boardgames`](https://www.reddit.com/r/boardgames), all I have to do is use the following url: https://api.pushshift.io/reddit/search/submission?subreddit=boardgames
+### Data Sourcing and Cleaning
 
-To help you get started, we have a primer video on how to use the API: https://youtu.be/AcrjEWsMi_E
+[get_data.py](project_3/code/get_data.py)
+[clean_raw_data.py](project_3/code/clean_raw_data.py)
+[preprocessing.py](project_3/code/preprocessing.py)
 
----
+Our three data preparation scripts can be found in the project_3/code/ directory.
 
-### Requirements
+Our `get_data script` has a preset list of our three subreddits of interest ('asoiaf','freefolk', and 'gameofthrones'), and accepts a number of days to search posts across (starting from 1 day ago and going back). After sourcing and structuring the data into a dataframe, it saves it as a .csv in the project_3/data directory.
 
-- Gather and prepare your data using the `requests` library.
-- **Create and compare two models**. One of these must be a Random Forest classifier, however the other can be a classifier of your choosing: logistic regression, KNN, SVM, etc.
-- A Jupyter Notebook with your analysis for a peer audience of data scientists.
-- An executive summary of your results.
-- A short presentation outlining your process and findings for a semi-technical audience.
+For our purposes, we gathered three years (1095 days) worth of data, which took about 1.5 hours with a 1.5 second delay between requests.
 
-**Pro Tip:** You can find a good example executive summary [here](https://www.proposify.biz/blog/executive-summary).
+Our `clean_raw_data` script reads in the .csv outputted by get_data, drops unnecessary columns, and then removes all posts which are missing our model input columns ('title' and 'selftext). 
 
----
+It then scrubs URLs, Reddit markdown artifacts, and punctuation from text columns. Finally, it drops any more rows which became empty due to cleaning or whose only text is '\[removed]' or '\[deleted]'. It then writes the remaining data to a new .csv.
 
-### Necessary Deliverables / Submission
+Lastly, our `preprocessing` script reads the output file of our `clean_raw_data` script and tokenizes, lemmatizes, and rejoins our text columns, outputting our final .csv for analysis.
 
-- Code and executive summary must be in a clearly commented Jupyter Notebook.
-- You must submit your slide deck.
-- Materials must be submitted by **10:00 AM on Friday, July 24th**.
+### Custom Stop Words
 
----
+[additional_stopwords_identification.ipynb](project_3/code/additional_stopwords_identification.ipynb)
 
-## Rubric
-Your local instructor will evaluate your project (for the most part) using the following criteria.  You should make sure that you consider and/or follow most if not all of the considerations/recommendations outlined below **while** working through your project.
+In this notebook, we explore the frequency of words in the dataset after excluding Scikit-Learn's built-in english-language stopwords.
 
-For Project 3 the evaluation categories are as follows:<br>
-**The Data Science Process**
-- Problem Statement
-- Data Collection
-- Data Cleaning & EDA
-- Preprocessing & Modeling
-- Evaluation and Conceptual Understanding
-- Conclusion and Recommendations
+![Most Common Words Without Custom Stopwords](project_3/images/before stopwords.png)
 
-**Organization and Professionalism**
-- Organization
-- Visualizations
-- Python Syntax and Control Flow
-- Presentation
+Building an additional set of custom stopwords is important for this project in particular because of the massive topical overlap of our text sources. As you can see above, the three subreddits would be almost indistinguishable if you simply presented the most common words in each, even after removing generic english-language stopwords.
 
-**Scores will be out of 30 points based on the 10 categories in the rubric.** <br>
-*3 points per section*<br>
+Our methodology involved finding the 100 most common words in the entire data set, and removing any which were not in the top 100 most common words in all three subreddits individually.
 
-| Score | Interpretation |
-| --- | --- |
-| **0** | *Project fails to meet the minimum requirements for this item.* |
-| **1** | *Project meets the minimum requirements for this item, but falls significantly short of portfolio-ready expectations.* |
-| **2** | *Project exceeds the minimum requirements for this item, but falls short of portfolio-ready expectations.* |
-| **3** | *Project meets or exceeds portfolio-ready expectations; demonstrates a thorough understanding of every outlined consideration.* |
+We then manually added several terms used for mandatory post title spoiler tags in r/asoiaf, which would have made the r/asoiaf posts trivially easy to recognize for our models, as we are including the titles in the full analysis text.
 
+This notebook outputs a final .JSON of stopwords for us to append to Scikit-Learn's built-in stopwords.
 
-### The Data Science Process
+### Data Exploration and Visualizations
 
-**Problem Statement**
-- Is it clear what the goal of the project is?
-- What type of model will be developed?
-- How will success be evaluated?
-- Is the scope of the project appropriate?
-- Is it clear who cares about this or why this is important to investigate?
-- Does the student consider the audience and the primary and secondary stakeholders?
+[EDA And Visualizations.ipynb](project_3/code/EDA And Visualizations.ipynb)
 
-**Data Collection**
-- Was enough data gathered to generate a significant result?
-- Was data collected that was useful and relevant to the project?
-- Was data collection and storage optimized through custom functions, pipelines, and/or automation?
-- Was thought given to the server receiving the requests such as considering number of requests per second?
+In this notebook, we explore our text data in a bag-of-words state. We investigate the most common words per subreddit, and words which are distinctive to each subreddit.
 
-**Data Cleaning and EDA**
-- Are missing values imputed/handled appropriately?
-- Are distributions examined and described?
-- Are outliers identified and addressed?
-- Are appropriate summary statistics provided?
-- Are steps taken during data cleaning and EDA framed appropriately?
-- Does the student address whether or not they are likely to be able to answer their problem statement with the provided data given what they've discovered during EDA?
+### Modeling and Analysis
 
-**Preprocessing and Modeling**
-- Is text data successfully converted to a matrix representation?
-- Are methods such as stop words, stemming, and lemmatization explored?
-- Does the student properly split and/or sample the data for validation/training purposes?
-- Does the student test and evaluate a variety of models to identify a production algorithm (**AT MINIMUM:** Bayes and one other model)?
-- Does the student defend their choice of production model relevant to the data at hand and the problem?
-- Does the student explain how the model works and evaluate its performance successes/downfalls?
+[Modeling and Analysis.ipynb](project_3/code/Modeling and Analysis.ipynb)
 
-**Evaluation and Conceptual Understanding**
-- Does the student accurately identify and explain the baseline score?
-- Does the student select and use metrics relevant to the problem objective?
-- Does the student interpret the results of their model for purposes of inference?
-- Is domain knowledge demonstrated when interpreting results?
-- Does the student provide appropriate interpretation with regards to descriptive and inferential statistics?
+In this notebook, we build our models, tracking their accuracy, and make overall evaluations of model performance.
 
-**Conclusion and Recommendations**
-- Does the student provide appropriate context to connect individual steps back to the overall project?
-- Is it clear how the final recommendations were reached?
-- Are the conclusions/recommendations clearly stated?
-- Does the conclusion answer the original problem statement?
-- Does the student address how findings of this research can be applied for the benefit of stakeholders?
-- Are future steps to move the project forward identified?
+## Conclusions and Recommendations
 
+Our models successfully beat the baseline of ~44% accuracy with our best model achieving a 60% accuracy on test data, demonstrating that there are substantive differences between r/freefolk, r/gameofthrones, and r/asoiaf. We thus recommend that all three subreddits be allowed to continue in their current forms.
 
-### Organization and Professionalism
+If we wish to improve our classification models in the future, we would recomnmend devoting additional compute time to fine-combed hyperparameter searching over a wider space, using our full source data.
 
-**Project Organization**
-- Are modules imported correctly (using appropriate aliases)?
-- Are data imported/saved using relative paths?
-- Does the README provide a good executive summary of the project?
-- Is markdown formatting used appropriately to structure notebooks?
-- Are there an appropriate amount of comments to support the code?
-- Are files & directories organized correctly?
-- Are there unnecessary files included?
-- Do files and directories have well-structured, appropriate, consistent names?
-
-**Visualizations**
-- Are sufficient visualizations provided?
-- Do plots accurately demonstrate valid relationships?
-- Are plots labeled properly?
-- Are plots interpreted appropriately?
-- Are plots formatted and scaled appropriately for inclusion in a notebook-based technical report?
-
-**Python Syntax and Control Flow**
-- Is care taken to write human readable code?
-- Is the code syntactically correct (no runtime errors)?
-- Does the code generate desired results (logically correct)?
-- Does the code follows general best practices and style guidelines?
-- Are Pandas functions used appropriately?
-- Are `sklearn` and `NLTK` methods used appropriately?
-
-**Presentation**
-- Is the problem statement clearly presented?
-- Does a strong narrative run through the presentation building toward a final conclusion?
-- Are the conclusions/recommendations clearly stated?
-- Is the level of technicality appropriate for the intended audience?
-- Is the student substantially over or under time?
-- Does the student appropriately pace their presentation?
-- Does the student deliver their message with clarity and volume?
-- Are appropriate visualizations generated for the intended audience?
-- Are visualizations necessary and useful for supporting conclusions/explaining findings?
-
-
----
-
-### Why did we choose this project for you?
-This project covers three of the biggest concepts we cover in the class: Classification Modeling, Natural Language Processing and Data Wrangling/Acquisition.
-
-Part 1 of the project focuses on **Data wrangling/gathering/acquisition**. This is a very important skill as not all the data you will need will be in clean CSVs or a single table in SQL.  There is a good chance that wherever you land you will have to gather some data from some unstructured/semi-structured sources; when possible, requesting information from an API, but often scraping it because they don't have an API (or it's terribly documented).
-
-Part 2 of the project focuses on **Natural Language Processing** and converting standard text data (like Titles and Comments) into a format that allows us to analyze it and use it in modeling.
-
-Part 3 of the project focuses on **Classification Modeling**.  Given that project 2 was a regression focused problem, we needed to give you a classification focused problem to practice the various models, means of assessment and preprocessing associated with classification.   
+## Sources
+- [Data Sourced from the PushShift API](https://github.com/pushshift/api)
+- [Efficacy of Random Hyperparameter Search](https://towardsdatascience.com/random-search-vs-grid-search-for-hyperparameter-optimization-345e1422899d)
+- [r/freefolk](https://www.reddit.com/r/freefolk)
+- [r/gameofthrones](https://www.reddit.com/r/gameofthrones)
+- [r/asoiaf](https://www.reddit.com/r/asoiaf)
